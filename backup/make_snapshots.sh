@@ -2,16 +2,29 @@
 
 MY_HOME=$(dirname $(readlink -f "${0}"))
 
-source ${MY_HOME}/config.sh
+if [ ! -f "${1}" ]
+then
+   echo "Usage: ${0} <config>" >&2
+   exit 1
+fi
 
-function ensure_root {
-   # make sure we're running as root
-   if (( `"${ID}" -u` != 0 )); 
-   then 
-      "${ECHO}" "You are not root.  Exiting..." >&2
-      exit 1
-   fi
-}
+echo "Using config '${1}'"
+source "${1}"
+
+
+# ------------- sanity checks --------------------------------------
+
+if ! [[ "${NUM_SNAPSHOTS}" =~ ^[\-0-9]+$ ]] || (( NUM_SNAPSHOTS < 1))
+then
+   echo "NUM_SNAPSHOTS (${NUM_SNAPSHOTS}) is not an integer that is at least 1." >&2
+   exit 1
+fi
+if [ ! -f "${SNAPSHOT_EXCLUDES}" ]
+then
+   echo "SNAPSHOT_EXCLUDES (${SNAPSHOT_EXCLUDES}) needs to be an existing file - possibly empty." >&2
+   exit 1
+fi
+
 
 function snapshot_path {
    printf "%s/snapshot-%02d" "${BACKUP_HOME}" "${1}"
@@ -29,13 +42,11 @@ function snapshot_path {
 #    }
 # fi;
 
-ensure_root
-
 # STEP 1: delete the oldest snapshot, if it exists:
 OLDEST="$(snapshot_path $((NUM_SNAPSHOTS-1)))"
 if [ -d "${OLDEST}" ]
 then
-   "${RM}" -rfv "${OLDEST}"
+   rm -rfv "${OLDEST}"
 fi
 
 # STEP 2: shift the middle snapshots(s) back by one, if they exist
@@ -44,7 +55,7 @@ do
    OLD="$(snapshot_path ${NUM})"
    if [ -d "${OLD}" ]
    then
-      "${MV}" -v "${OLD}" "$(snapshot_path $((NUM+1)))"
+      mv -v "${OLD}" "$(snapshot_path $((NUM+1)))"
    fi
 done
 
@@ -53,7 +64,7 @@ done
 LATEST="$(snapshot_path 0)"
 if [ -d "${LATEST}" ]
 then
-   "${CP}" -alv "${LATEST}" "$(snapshot_path 1)"
+   cp -alv "${LATEST}" "$(snapshot_path 1)"
 fi
 
 # step 4: rsync from the system into the latest snapshot (notice that
@@ -67,7 +78,7 @@ do
 done
 
 # STEP 5: update the mtime of hourly.0 to reflect the snapshot time
-"${TOUCH}" "${LATEST}"
+touch "${LATEST}"
 
 # and thats it for home.
 
