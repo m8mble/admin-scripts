@@ -1,0 +1,13 @@
+# What to sync
+declare -A SNAPSHOT_ORIGINS # Array of location -> name
+SNAPSHOT_ORIGINS['/path/to/a']='hans'
+SNAPSHOT_ORIGINS['/some/b']='peter'
+BACKUP_HOME=/where/snapshots/are/located/in
+#MOUNT_DEVICE=/dev/hdb1
+#SNAPSHOT_RW=/root/snapshot
+SNAPSHOT_EXCLUDES="/path/to/file/with/rsync/exludes"
+
+# How to snapshot
+NUM_SNAPSHOTS=3 # Number of snapshots maintained
+
+
