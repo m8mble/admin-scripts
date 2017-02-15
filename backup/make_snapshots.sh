@@ -71,10 +71,13 @@ fi
 # rsync behaves like cp --remove-destination by default, so the destination
 # is unlinked first.  If it were not so, this would copy over the other
 # snapshot(s) too!
-for SRC in ${SNAPSHOT_LOCATIONS[*]}
+mkdir -vp ${LATEST}
+for SRC in ${!SNAPSHOT_ORIGINS[@]}
 do
-   "${RSYNC}" -va --delete --delete-excluded --exclude-from="$EXCLUDES" \
-       "${SRC}" "${LATEST}/"
+   # Src with trailing '/', tgt without.
+   rsync -va --delete --delete-excluded --exclude-from="${SNAPSHOT_EXCLUDES}" \
+      "$(readlink -m "${SRC}")/" \
+      "$(readlink -m ${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]})"
 done
 
 # STEP 5: update the mtime of hourly.0 to reflect the snapshot time
