@@ -70,12 +70,19 @@ LATEST="$(snapshot_path 0)"
 mkdir -vp ${LATEST}
 for SRC in ${!SNAPSHOT_ORIGINS[@]}
 do
+   LINK_DEST="$(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]}"
+   EXTRA_ARGS=""
+   if [ -d "${LINK_DEST}" ]
+   then
+      EXTRA_ARGS="--link-dest=$(readlink -m ${LINK_DEST})"
+   fi
+
    # Src with trailing '/', tgt without.
    rsync -va --delete --delete-excluded \
       --exclude-from="${SNAPSHOT_EXCLUDES}" \
-      --link-dest="$(readlink -m $(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]})" \
       "$(readlink -m "${SRC}")/" \
-      "$(readlink -m ${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]})"
+      "$(readlink -m ${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]})" \
+      ${EXTRA_ARGS}
 done
 
 # STEP 4: update the mtime of hourly.0 to reflect the snapshot time
