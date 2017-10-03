@@ -1,2 +1,7 @@
 backup/config.sh
 backup/rsync.xc
+
+# Editor temporaries
+*.bkp
+*.*~
+*.kate-swp
