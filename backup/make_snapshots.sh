@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-MY_HOME=$(dirname $(readlink -f "${0}"))
-
 if [ ! -f "${1}" ]
 then
    echo "Usage: ${0} <config>" >&2
@@ -9,12 +7,13 @@ then
 fi
 
 echo "Using config '${1}'"
+# shellcheck source=/dev/null
 source "${1}"
 
 
 # ------------- sanity checks --------------------------------------
 
-if ! [[ "${NUM_SNAPSHOTS}" =~ ^[\-0-9]+$ ]] || (( NUM_SNAPSHOTS < 1))
+if ! [[ "${NUM_SNAPSHOTS}" =~ ^[-0-9]+$ ]] || (( NUM_SNAPSHOTS < 1))
 then
    echo "NUM_SNAPSHOTS (${NUM_SNAPSHOTS}) is not an integer that is at least 1." >&2
    exit 1
@@ -52,7 +51,7 @@ fi
 # STEP 2: shift remaining snapshots(s) back by one (including the first)
 for NUM in $(seq $((NUM_SNAPSHOTS-2)) -1 0)
 do
-   OLD="$(snapshot_path ${NUM})"
+   OLD="$(snapshot_path "${NUM}")"
    if [ -d "${OLD}" ]
    then
       mv -v "${OLD}" "$(snapshot_path $((NUM+1)))"
@@ -67,21 +66,21 @@ done
 # Use --link-dest=LDST flag which upon syncing SRC hard-links to LDST
 # iff the file in SRC is the same.
 LATEST="$(snapshot_path 0)"
-mkdir -vp ${LATEST}
-for SRC in ${!SNAPSHOT_ORIGINS[@]}
+mkdir -vp "${LATEST}"
+for SRC in "${!SNAPSHOT_ORIGINS[@]}"
 do
    LINK_DEST="$(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]}"
    EXTRA_ARGS=""
    if [ -d "${LINK_DEST}" ]
    then
-      EXTRA_ARGS="--link-dest=$(readlink -m ${LINK_DEST})"
+      EXTRA_ARGS="--link-dest=$(readlink -m "${LINK_DEST}")"
    fi
 
    # Src with trailing '/', tgt without.
    rsync -va --delete --delete-excluded \
       --exclude-from="${SNAPSHOT_EXCLUDES}" \
       "$(readlink -m "${SRC}")/" \
-      "$(readlink -m ${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]})" \
+      "$(readlink -m "${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]}")" \
       ${EXTRA_ARGS}
 done
 
