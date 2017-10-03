@@ -49,8 +49,8 @@ then
    rm -rfv "${OLDEST}"
 fi
 
-# STEP 2: shift the middle snapshots(s) back by one, if they exist
-for NUM in $(seq $((NUM_SNAPSHOTS-2)) -1 1)
+# STEP 2: shift remaining snapshots(s) back by one (including the first)
+for NUM in $(seq $((NUM_SNAPSHOTS-2)) -1 0)
 do
    OLD="$(snapshot_path ${NUM})"
    if [ -d "${OLD}" ]
@@ -59,31 +59,27 @@ do
    fi
 done
 
-# STEP 3: make a hard-link-only (except for dirs) copy of the latest snapshot,
-# if that exists
+# STEP 3: Create a new first snapshot for all SNAPSHOT_ORIGINS:
+# Make a full, hard-link-only copy of the latest snapshot, if that
+# exists. Afterwards rsync from the system into this latest snapshot.
+#
+# Do this in a single step (time for some rsync magic):
+# Use --link-dest=LDST flag which upon syncing SRC hard-links to LDST
+# iff the file in SRC is the same.
 LATEST="$(snapshot_path 0)"
-if [ -d "${LATEST}" ]
-then
-   cp -alv "${LATEST}" "$(snapshot_path 1)"
-fi
-
-# step 4: rsync from the system into the latest snapshot (notice that
-# rsync behaves like cp --remove-destination by default, so the destination
-# is unlinked first.  If it were not so, this would copy over the other
-# snapshot(s) too!
 mkdir -vp ${LATEST}
 for SRC in ${!SNAPSHOT_ORIGINS[@]}
 do
    # Src with trailing '/', tgt without.
-   rsync -va --delete --delete-excluded --exclude-from="${SNAPSHOT_EXCLUDES}" \
+   rsync -va --delete --delete-excluded \
+      --exclude-from="${SNAPSHOT_EXCLUDES}" \
+      --link-dest="$(readlink -m $(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]})" \
       "$(readlink -m "${SRC}")/" \
       "$(readlink -m ${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]})"
 done
 
-# STEP 5: update the mtime of hourly.0 to reflect the snapshot time
+# STEP 4: update the mtime of hourly.0 to reflect the snapshot time
 touch "${LATEST}"
-
-# and thats it for home.
 
 # now remount the RW snapshot mountpoint as readonly
 # $MOUNT -o remount,ro $MOUNT_DEVICE $SNAPSHOT_RW ;
@@ -92,4 +88,3 @@ touch "${LATEST}"
 #       $ECHO "snapshot: could not remount $SNAPSHOT_RW readonly";
 #       exit;
 #    } fi;
-
