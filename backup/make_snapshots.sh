@@ -26,7 +26,7 @@ then
 fi
 
 
-function snapshot_path {
+snapshot_path () {
    printf "%s/snapshot-%02d" "${BACKUP_HOME}" "${1}"
 }
 
