@@ -26,8 +26,10 @@ then
 fi
 
 
+NUM_SNAPSHOT_PLACES=$(echo "${NUM_SNAPSHOTS}" \
+    | awk 'function ceil(v){ return (v == int(v))?v: int(v)+1} {printf "%d", ceil(log($1)/log(10))}')
 snapshot_path () {
-   printf "%s/snapshot-%02d" "${BACKUP_HOME}" "${1}"
+   printf "%s/snapshot-%0${NUM_SNAPSHOT_PLACES}d" "${BACKUP_HOME}" "${1}"
 }
 
 # ------------- the script itself --------------------------------------
