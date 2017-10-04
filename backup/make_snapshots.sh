@@ -86,7 +86,10 @@ do
    rsync "${RSYNC_ARGS[@]}"
 done
 
-# STEP 4: update the mtime of hourly.0 to reflect the snapshot time
+# STEP 4: Sync snapshot config
+cp -v "${CONFIG}" "${LATEST}/config.sh"
+
+# STEP 5: update mtime of latest snapshot to reflect the snapshot time
 touch "${LATEST}"
 
 # now remount the RW snapshot mountpoint as readonly
