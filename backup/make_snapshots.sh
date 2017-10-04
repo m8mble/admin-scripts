@@ -6,9 +6,10 @@ then
    exit 1
 fi
 
-echo "Using config '${1}'"
+CONFIG="${1}"
+echo "Using config '${CONFIG}'"
 # shellcheck source=/dev/null
-source "${1}"
+source "${CONFIG}"
 
 
 # ------------- sanity checks --------------------------------------
