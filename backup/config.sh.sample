@@ -9,5 +9,10 @@ SNAPSHOT_EXCLUDES="/path/to/file/with/rsync/exludes"
 
 # How to snapshot
 NUM_SNAPSHOTS=3 # Number of snapshots maintained
+NUM_SNAPSHOT_PLACES=2 # Will be calculated if omitted.
+# How snapshots are created:
+#  - hardlink-rsync: rsync on top of hardlink copy of last snapshot.
+#  - hardlink: only do hardlinking from SRC. Only useful when working on existing snapshots.
+SNAPSHOT_CREATION_MODE='hardlink-rsync'
 
 
