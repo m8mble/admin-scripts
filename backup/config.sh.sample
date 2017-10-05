@@ -5,6 +5,7 @@ SNAPSHOT_ORIGINS['/some/b']='peter'
 BACKUP_HOME=/where/snapshots/are/located/in
 #MOUNT_DEVICE=/dev/hdb1
 #SNAPSHOT_RW=/root/snapshot
+# Optional: rsync exclude-file with everything to be ignored in snapshots.
 SNAPSHOT_EXCLUDES="/path/to/file/with/rsync/exludes"
 
 # How to snapshot

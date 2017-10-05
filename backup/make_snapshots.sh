@@ -29,12 +29,17 @@ create_rsync_snapshot() {
    SRC="${1}"
    TGT="${2}"
    LINK_DEST="${3}"
+   EXCLUDES="${4}"
 
    RSYNC_ARGS=(-va --delete --delete-excluded \
-      "--exclude-from=${SNAPSHOT_EXCLUDES}" \
       "$(readlink -m "${SRC}")/" \
       "$(readlink -m "${TGT}")")
 
+   # ... with link-dest iff available
+   if [ -e "${EXCLUDES}" ]
+   then
+      RSYNC_ARGS=("${RSYNC_ARGS[@]}" "--exclude-from=${EXCLUDES}")
+   fi
    # ... with link-dest iff available
    if [ -d "${LINK_DEST}" ]
    then
@@ -63,12 +68,6 @@ then
    echo "NUM_SNAPSHOTS (${NUM_SNAPSHOTS}) is not an integer that is at least 1." >&2
    exit 1
 fi
-if [ ! -f "${SNAPSHOT_EXCLUDES}" ]
-then
-   echo "SNAPSHOT_EXCLUDES (${SNAPSHOT_EXCLUDES}) needs to be an existing file - possibly empty." >&2
-   exit 1
-fi
-
 if [ -z ${NUM_SNAPSHOT_PLACES+x} ]
 then
    NUM_SNAPSHOT_PLACES=$(echo "${NUM_SNAPSHOTS}" \
@@ -83,7 +82,6 @@ then
    echo "Config must not overwrite \`create_new_snapshot\`." >&2
    exit 1
 fi
-
 case "${SNAPSHOT_CREATION_MODE}" in
    'hardlink-rsync')
       create_new_snapshot() {
@@ -140,7 +138,8 @@ do
    create_new_snapshot \
       "${SRC}" \
       "${LATEST}/${SNAPSHOT_ORIGINS[${SRC}]}" \
-      "$(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]}"
+      "$(snapshot_path 1)/${SNAPSHOT_ORIGINS[${SRC}]}" \
+      "${SNAPSHOT_EXCLUDES}"
 done
 
 # STEP 4: Sync snapshot config
