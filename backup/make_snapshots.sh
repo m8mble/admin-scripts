@@ -25,9 +25,11 @@ then
    exit 1
 fi
 
-
-NUM_SNAPSHOT_PLACES=$(echo "${NUM_SNAPSHOTS}" \
-    | awk 'function ceil(v){ return (v == int(v))?v: int(v)+1} {printf "%d", ceil(log($1)/log(10))}')
+if [ -z ${NUM_SNAPSHOT_PLACES+x} ]
+then
+   NUM_SNAPSHOT_PLACES=$(echo "${NUM_SNAPSHOTS}" \
+      | awk 'function ceil(v){ return (v == int(v))?v: int(v)+1} {printf "%d", ceil(log($1)/log(10))}')
+fi
 snapshot_path () {
    printf "%s/snapshot-%0${NUM_SNAPSHOT_PLACES}d" "${BACKUP_HOME}" "${1}"
 }
