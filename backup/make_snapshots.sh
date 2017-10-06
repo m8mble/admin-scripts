@@ -68,7 +68,7 @@ then
    echo "NUM_SNAPSHOTS (${NUM_SNAPSHOTS}) is not an integer that is at least 1." >&2
    exit 1
 fi
-if [ -z ${NUM_SNAPSHOT_PLACES+x} ]
+if [ -z "${NUM_SNAPSHOT_PLACES}" ]
 then
    NUM_SNAPSHOT_PLACES=$(echo "${NUM_SNAPSHOTS}" \
       | awk 'function ceil(v){ return (v == int(v))?v: int(v)+1} {printf "%d", ceil(log($1)/log(10))}')
@@ -77,7 +77,7 @@ snapshot_path () {
    printf "%s/snapshot-%0${NUM_SNAPSHOT_PLACES}d" "${BACKUP_HOME}" "${1}"
 }
 
-if [ $(is_callable create_new_snapshot) -ne 0 ]
+if [ "$(is_callable create_new_snapshot)" -ne 0 ]
 then
    echo "Config must not overwrite \`create_new_snapshot\`." >&2
    exit 1
