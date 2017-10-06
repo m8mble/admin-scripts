@@ -101,17 +101,9 @@ case "${SNAPSHOT_CREATION_MODE}" in
       exit 1
 esac
 
+
 # ------------- the script itself --------------------------------------
 
-
-# # attempt to remount the RW mount point as RW; else abort
-# $MOUNT -o remount,rw $MOUNT_DEVICE $SNAPSHOT_RW ;
-# if (( $? )); then
-#    {
-#       $ECHO "snapshot: could not remount $SNAPSHOT_RW readwrite";
-#        exit;
-#    }
-# fi;
 
 # STEP 1: delete the oldest snapshot, if it exists:
 OLDEST="$(snapshot_path $((NUM_SNAPSHOTS-1)))"
@@ -147,11 +139,3 @@ cp -v "${CONFIG}" "${LATEST}/config.sh"
 
 # STEP 5: update mtime of latest snapshot to reflect the snapshot time
 touch "${LATEST}"
-
-# now remount the RW snapshot mountpoint as readonly
-# $MOUNT -o remount,ro $MOUNT_DEVICE $SNAPSHOT_RW ;
-# if (( $? )); then
-#    {
-#       $ECHO "snapshot: could not remount $SNAPSHOT_RW readonly";
-#       exit;
-#    } fi;
