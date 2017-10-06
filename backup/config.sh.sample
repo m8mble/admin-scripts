@@ -15,5 +15,5 @@ NUM_SNAPSHOT_PLACES=2 # Will be calculated if omitted.
 #  - hardlink-rsync: rsync on top of hardlink copy of last snapshot.
 #  - hardlink: only do hardlinking from SRC. Only useful when working on existing snapshots.
 SNAPSHOT_CREATION_MODE='hardlink-rsync'
-
-
+# Optional: Prefix of all snapshots created. (default: 'snapshot')
+SNAPSHOT_PREFIX='daily'
