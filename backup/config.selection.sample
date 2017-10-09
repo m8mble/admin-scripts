@@ -33,7 +33,7 @@ unset SNAPSHOT_ORIGINS
 declare -A SNAPSHOT_ORIGINS
 for TGT in "${TARGETS[@]}"
 do
-   SNAPSHOT_ORIGINS["${TGT}"]="${SNAPSHOT_BASE}/${TGT}"
+   SNAPSHOT_ORIGINS["${SNAPSHOT_BASE}/${TGT}"]="${TGT}"
 done
 
 # Overwrite how snapshots will be done.
