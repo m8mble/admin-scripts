@@ -1,0 +1,42 @@
+if [ ! -z "${BASH_SOURCE}" ]
+then
+   CONFIG_HOME=$(dirname "$(readlink -f "${BASH_SOURCE}")")
+else
+   CONFIG_HOME=.
+fi
+
+#
+# TODO SPECIFY APPROPRIATE
+#
+# Import some other config initially.
+source "${CONFIG_HOME}/config.sh.sample"
+
+# From this point on: BACKUP_HOME already set by daily cfg.
+# Ensure, SNAPSHOT_PREFIX also exists.
+if [ -z "${SNAPSHOT_PREFIX}" ]
+then
+   SNAPSHOT_PREFIX='snapshot'
+fi
+
+# Determine latest existing snapshot out there:
+SNAPSHOT_BASE="$(\
+   find "${BACKUP_HOME}" -regextype egrep -regex ".*/${SNAPSHOT_PREFIX}-0+" -printf '%T@ %p\n' \
+   | sort -k 1nr \
+   | cut -d ' ' -f "2-" \
+   | head -1 )"
+
+# Save snapshot targets.
+TARGETS=("${SNAPSHOT_ORIGINS[@]}")
+
+# Overwrite SNAPSHOT_ORIGINS with new targets.
+unset SNAPSHOT_ORIGINS
+declare -A SNAPSHOT_ORIGINS
+for TGT in "${TARGETS[@]}"
+do
+   SNAPSHOT_ORIGINS["${TGT}"]="${SNAPSHOT_BASE}/${TGT}"
+done
+
+# Overwrite how snapshots will be done.
+NUM_SNAPSHOTS=12
+SNAPSHOT_CREATION_MODE='hardlink'
+SNAPSHOT_PREFIX='monthly'
